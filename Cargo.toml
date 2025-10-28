@@ -20,3 +20,14 @@ midir = "*"
 clap = { version = "4.4", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+# Windows target configurations
+[target.x86_64-pc-windows-gnu]
+# Cross-compilation from Linux (requires mingw-w64 installation)
+
+# macOS target configurations (requires osxcross toolchain for Linux cross-compilation)
+[target.x86_64-apple-darwin]
+# Intel-based macOS
+
+[target.aarch64-apple-darwin]
+# Apple Silicon macOS (M1/M2/M3)

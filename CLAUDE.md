@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build and Run Commands
 
 ```bash
-# Build the project
+# Build the project (Linux)
 cargo build
 
 # Run the application with GUI
@@ -39,6 +39,42 @@ cargo clippy
 # Run tests (if any exist)
 cargo test
 ```
+
+### Cross-Platform Building (from Linux)
+
+```bash
+# First-time setup: Install targets and dependencies
+rustup target add x86_64-pc-windows-gnu
+
+# Install cross-compilation dependencies
+sudo apt install gcc-mingw-w64-x86-64  # For Windows GNU target
+
+# Build for Windows (cross-compile from Linux - works reliably)
+cargo build --target x86_64-pc-windows-gnu
+cargo build --release --target x86_64-pc-windows-gnu
+
+# Cross-platform builds output to:
+# target/x86_64-pc-windows-gnu/debug/dildonicaFrontend.exe
+```
+
+### macOS Cross-Compilation (Advanced Setup Required)
+
+macOS cross-compilation from Linux requires significant additional setup:
+
+```bash
+# Install osxcross toolchain (complex process)
+# See: https://github.com/tpoechtrager/osxcross
+
+# After osxcross setup:
+rustup target add x86_64-apple-darwin
+rustup target add aarch64-apple-darwin
+
+# Build for macOS (only after osxcross installation)
+cargo build --target x86_64-apple-darwin
+cargo build --target aarch64-apple-darwin
+```
+
+**Recommendation for macOS builds:** Build natively on macOS or use GitHub Actions/CI for cross-platform releases.
 
 ## Project Overview
 
