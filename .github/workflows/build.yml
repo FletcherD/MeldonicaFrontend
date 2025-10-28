@@ -67,13 +67,18 @@ jobs:
         sudo apt install -y gcc-mingw-w64-x86-64
     
     - name: Cache cargo dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
         key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-${{ matrix.target }}-
+          ${{ runner.os }}-cargo-
     
     - name: Build
       run: cargo build --release --target ${{ matrix.target }}
@@ -99,28 +104,14 @@ jobs:
         asset_name: ${{ matrix.asset_name }}
         asset_content_type: application/octet-stream
 
-  build-headless-variants:
-    name: Build headless variants
+  upload-release-docs:
+    name: Upload release documentation
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'release'
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-    
-    - name: Cache cargo dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: ubuntu-headless-cargo-${{ hashFiles('**/Cargo.lock') }}
-    
-    - name: Build headless documentation
+    - name: Create release documentation
       run: |
         echo "# DildonicaFrontend Release Builds" > BUILD_INFO.md
         echo "" >> BUILD_INFO.md
