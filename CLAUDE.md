@@ -76,6 +76,31 @@ cargo build --target aarch64-apple-darwin
 
 **Recommendation for macOS builds:** Build natively on macOS or use GitHub Actions/CI for cross-platform releases.
 
+### GitHub Actions Cross-Platform Builds
+
+This repository includes a GitHub Actions workflow (`.github/workflows/build.yml`) that automatically builds for all supported platforms:
+
+**Automatic builds on:**
+- Every push to `main` branch
+- Every pull request
+- Every release (with automatic asset uploads)
+
+**Supported platforms:**
+- Linux x86_64 (native)
+- Windows x86_64 (cross-compiled with MinGW)
+- macOS Intel x86_64 (native on macOS runner)  
+- macOS Apple Silicon aarch64 (native on macOS runner)
+
+**To create a release with binaries:**
+1. Create a Git tag: `git tag v1.0.0`
+2. Push the tag: `git push origin v1.0.0`
+3. Create a GitHub release from the tag
+4. Binaries will be automatically built and attached to the release
+
+**Artifacts are available:**
+- As build artifacts on every workflow run
+- As release assets when you publish a GitHub release
+
 ## Project Overview
 
 DildonicaFrontendRs is a Rust frontend application for the Dildonica - a novel musical instrument. The Dildonica contains 8 coils that form resonant circuits, where manipulating the silicone instrument changes the geometry and thus the oscillation periods of these circuits. This application:
