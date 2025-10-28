@@ -30,6 +30,7 @@ pub struct PlotApp {
     pub zone_configs: Arc<Mutex<[DildonicaZoneConfig; NUM_ZONES]>>,
     pub config_tx: Option<mpsc::Sender<[DildonicaZoneConfig; NUM_ZONES]>>,
     pub config_read_tx: Option<mpsc::Sender<()>>,
+    pub alpha_tx: Option<mpsc::Sender<f64>>,
     pub app_config: Arc<Mutex<AppConfig>>,
     pub selected_tab: Tab,
 }
@@ -41,6 +42,7 @@ impl PlotApp {
         zone_configs: Arc<Mutex<[DildonicaZoneConfig; NUM_ZONES]>>,
         config_tx: mpsc::Sender<[DildonicaZoneConfig; NUM_ZONES]>,
         config_read_tx: mpsc::Sender<()>,
+        alpha_tx: mpsc::Sender<f64>,
         app_config: Arc<Mutex<AppConfig>>,
     ) -> Self {
         Self {
@@ -51,6 +53,7 @@ impl PlotApp {
             zone_configs,
             config_tx: Some(config_tx),
             config_read_tx: Some(config_read_tx),
+            alpha_tx: Some(alpha_tx),
             app_config,
             selected_tab: Tab::Plot,
         }

@@ -98,6 +98,10 @@ pub fn render_config_tab(app: &mut PlotApp, ui: &mut egui::Ui, ctx: &egui::Conte
                 if let Err(e) = app_config.save_to_file() {
                     eprintln!("Failed to save app config: {}", e);
                 }
+                // Send the new alpha value to update the zone averages
+                if let Some(ref tx) = app.alpha_tx {
+                    let _ = tx.try_send(app_config.exponential_alpha);
+                }
                 ctx.request_repaint();
             }
         });

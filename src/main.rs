@@ -14,6 +14,7 @@ use gui::{PlotApp, ProcessedSample};
 use futures::stream::StreamExt;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
+use num_traits::pow;
 use thiserror::Error;
 use tokio::sync::mpsc;
 use uuid::Uuid;
@@ -22,8 +23,6 @@ const SERVICE_UUID: Uuid = Uuid::from_u128(0x64696c640000100080000000cafebabe);
 const CHARACTERISTIC_UUID: Uuid = Uuid::from_u128(0x6f6e69630000100080000000cafebabe);
 const CONFIG_CHARACTERISTIC_UUID: Uuid = Uuid::from_u128(0x6f6e69620000100080000000cafebabe);
 const DEVICE_MAC: &str = "DB:96:90:70:68:A4";
-
-
 
 const NUM_ZONES: usize = 8;
 
@@ -77,9 +76,6 @@ impl Sample {
     }
 }
 
-
-
-
 fn process_sample(
     sample: Sample,
     zone_averages: &mut [exponential_average::ExponentialAverage; NUM_ZONES],
@@ -97,6 +93,7 @@ fn process_sample(
         let raw = value as f64;
         zone_averages[zone].update(raw);
         let average = zone_averages[zone].get_average().unwrap_or(0.0);
+        //let normalized = pow(raw - average, 2) / pow(average, 2);
         let normalized = (raw - average) / average;
         (raw, normalized)
     } else {
@@ -125,6 +122,7 @@ async fn main() -> Result<(), SampleError> {
     let (tx, rx) = mpsc::channel(100);
     let (config_tx, config_rx) = mpsc::channel::<[DildonicaZoneConfig; NUM_ZONES]>(10);
     let (config_read_tx, config_read_rx) = mpsc::channel::<()>(10);
+    let (alpha_tx, alpha_rx) = mpsc::channel::<f64>(10);
     let mut zone_averages = {
         let config = app_config.lock().unwrap();
         [exponential_average::ExponentialAverage::new(config.exponential_alpha); NUM_ZONES]
@@ -201,6 +199,7 @@ async fn main() -> Result<(), SampleError> {
 
             let mut config_rx = config_rx;
             let mut config_read_rx = config_read_rx;
+            let mut alpha_rx = alpha_rx;
             loop {
                 tokio::select! {
                     Some(data) = notification_stream.next() => {
@@ -240,6 +239,12 @@ async fn main() -> Result<(), SampleError> {
                             Err(e) => eprintln!("Failed to read configuration: {}", e),
                         }
                     }
+                    Some(new_alpha) = alpha_rx.recv() => {
+                        println!("Updating exponential alpha to {}", new_alpha);
+                        for avg in &mut zone_averages {
+                            avg.set_alpha(new_alpha);
+                        }
+                    }
                 }
             }
         } else {
@@ -260,6 +265,7 @@ async fn main() -> Result<(), SampleError> {
                     zone_configs,
                     config_tx,
                     config_read_tx,
+                    alpha_tx,
                     app_config,
                 )))
             }),

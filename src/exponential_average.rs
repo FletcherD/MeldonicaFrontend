@@ -26,4 +26,12 @@ impl ExponentialAverage {
     pub fn get_average(&self) -> Option<f64> {
         self.current_average
     }
+
+    pub fn set_alpha(&mut self, alpha: f64) {
+        assert!(
+            (0.0..=1.0).contains(&alpha),
+            "Alpha must be between 0 and 1"
+        );
+        self.alpha = alpha;
+    }
 }
